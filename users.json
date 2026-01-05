@@ -1,0 +1,13 @@
+{
+  "admin": {
+    "password": "admin123",
+    "role": "admin"
+  },
+  "luuvanhien": {
+    "password": "hien123",
+    "role": "user",
+    "created_date": "2026-01-05T21:32:00.765302",
+    "expiry_type": "days",
+    "expiry_days": 30
+  }
+}
