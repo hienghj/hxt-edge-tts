@@ -157,13 +157,20 @@ USERS_FILE = "users.json"
 SESSION_FILE = "session.json"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+# Initialize users file if not exists
+if not os.path.exists(USERS_FILE):
+    with open(USERS_FILE, 'w', encoding='utf-8') as f:
+        json.dump({"admin": {"password": "admin123", "role": "admin"}}, f, indent=2)
+
 def load_users():
     """Load users from JSON"""
     try:
         with open(USERS_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     except:
-        return {"admin": {"password": "admin123", "role": "admin"}}
+        default_users = {"admin": {"password": "admin123", "role": "admin"}}
+        save_users(default_users)
+        return default_users
 
 def save_users(users):
     """Save users to JSON"""
