@@ -154,7 +154,6 @@ st.markdown("""
 
 OUTPUT_DIR = "outputs"
 USERS_FILE = "users.json"
-SESSION_FILE = "session.json"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Initialize users file if not exists
@@ -176,41 +175,6 @@ def save_users(users):
     """Save users to JSON"""
     with open(USERS_FILE, 'w', encoding='utf-8') as f:
         json.dump(users, f, indent=2, ensure_ascii=False)
-
-def save_session(username):
-    """Save session for auto-login"""
-    import secrets
-    token = secrets.token_hex(16)
-    session_data = {
-        "username": username,
-        "token": token,
-        "timestamp": datetime.now().isoformat()
-    }
-    with open(SESSION_FILE, 'w', encoding='utf-8') as f:
-        json.dump(session_data, f, indent=2)
-    return token
-
-def load_session():
-    """Load saved session"""
-    try:
-        with open(SESSION_FILE, 'r', encoding='utf-8') as f:
-            session_data = json.load(f)
-        # Check if session is less than 7 days old
-        from datetime import timedelta
-        session_time = datetime.fromisoformat(session_data['timestamp'])
-        if datetime.now() - session_time < timedelta(days=7):
-            return session_data['username']
-    except:
-        pass
-    return None
-
-def clear_session():
-    """Clear saved session"""
-    try:
-        if os.path.exists(SESSION_FILE):
-            os.remove(SESSION_FILE)
-    except:
-        pass
 
 def hash_password(password):
     """Simple password hashing"""
@@ -316,16 +280,6 @@ if 'username' not in st.session_state:
 if 'is_admin' not in st.session_state:
     st.session_state.is_admin = False
 
-# Auto-login from saved session
-if not st.session_state.logged_in:
-    saved_username = load_session()
-    if saved_username:
-        users = load_users()
-        if saved_username in users:
-            st.session_state.logged_in = True
-            st.session_state.username = saved_username
-            st.session_state.is_admin = users[saved_username].get('role') == 'admin'
-
 # LOGIN PAGE
 if not st.session_state.logged_in:
     st.markdown('<div class="big-title">HXT Edge-TTS</div>', unsafe_allow_html=True)
@@ -346,8 +300,6 @@ if not st.session_state.logged_in:
                 st.session_state.username = username
                 users = load_users()
                 st.session_state.is_admin = users[username].get('role') == 'admin'
-                # Save session for auto-login
-                save_session(username)
                 st.rerun()
             else:
                 st.error(f"❌ {message}")
@@ -453,8 +405,6 @@ with col2:
         st.session_state.logged_in = False
         st.session_state.username = None
         st.session_state.is_admin = False
-        # Clear saved session
-        clear_session()
         st.rerun()
 
 st.markdown("<br>", unsafe_allow_html=True)
